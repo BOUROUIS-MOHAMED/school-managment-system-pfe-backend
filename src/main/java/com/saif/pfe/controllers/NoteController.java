@@ -52,6 +52,14 @@ public class NoteController {
     public List<Note> getNotesByStudentId(@PathVariable Long studentId) {
         return noteService.getNotesByStudentId(studentId);
     }
+    @GetMapping("/teacher/{teacherId}")
+    public List<Note> getNotesByTeacherId(@PathVariable Long teacherId) {
+        return noteService.getNotesByTeacherId(teacherId);
+    }
+    @GetMapping("/course/{courseId}")
+    public List<Note> getNotesByCourseId(@PathVariable Long courseId) {
+        return noteService.getNotesByCourseId(courseId);
+    }
 
     @GetMapping("/student/pdf")
     public ResponseEntity<byte[]> generatePdf(@RequestParam("studentUuid") String studentUuid) {

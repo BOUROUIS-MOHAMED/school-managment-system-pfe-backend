@@ -14,5 +14,8 @@ public interface NoteService {
     Note updateNote(Long id, Note note);
     void deleteNote(Long id);
     List<Note> getNotesByStudentId(Long studentId);
+    List<Note> getNotesByTeacherId(Long teacherId);
+    List<Note> getNotesByCourseId(Long courseId);
+
     byte[] generatePdfForStudentNotes(Student student);
 }

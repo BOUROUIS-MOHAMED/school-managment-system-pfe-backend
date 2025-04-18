@@ -11,27 +11,14 @@ import lombok.*;
 @Setter
 @Builder
 @Entity
-public class Note extends Base {
+public class Semester extends Base {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Float score;
+    private String year;
 
-    @Enumerated(EnumType.STRING)
-    private NoteType type;
-
-    @ManyToOne
-    private Student student;
-
-    @ManyToOne
-    private Course course;
-
-    @ManyToOne
-    private Semester semester;
-
-    @ManyToOne
-    private Teacher teacher;
+    private int semester;
 
 }
