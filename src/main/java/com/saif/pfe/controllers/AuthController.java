@@ -1,10 +1,10 @@
 package com.saif.pfe.controllers;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
+import com.saif.pfe.payload.request.ChangePassRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,21 +55,45 @@ public class AuthController {
   public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
 
     Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
+            new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
     String jwt = jwtUtils.generateJwtToken(authentication);
-    
-    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();    
-    List<String> roles = userDetails.getAuthorities().stream()
-        .map(item -> item.getAuthority())
-        .collect(Collectors.toList());
 
-    return ResponseEntity.ok(new JwtResponse(jwt, 
-                         userDetails.getId(), 
-                         userDetails.getUsername(), 
-                         userDetails.getEmail(), 
-                         roles));
+    UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+    List<String> roles = userDetails.getAuthorities().stream()
+            .map(item -> item.getAuthority())
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(new JwtResponse(jwt,
+            userDetails.getId(),
+            userDetails.getUsername(),
+            userDetails.getEmail(),
+            roles));
+  }
+
+
+  @PostMapping("/changePassword")
+  public ResponseEntity<?> changePass(@Valid @RequestBody ChangePassRequest request, HttpServletRequest httpRequest) {
+    String token = httpRequest.getHeader("Authorization");
+    if (token != null && token.startsWith("Bearer ")) {
+      token = token.substring(7); // Remove the "Bearer " prefix
+    }
+
+    // Use JwtUtil to extract accountUsernameId from the token
+    String accountUsernameId = jwtUtils.getUserNameFromJwtToken(token);
+
+    System.out.println("the account username id extracted from token is " + accountUsernameId);
+
+    Optional<User> user = userRepository.findByUsername(accountUsernameId);
+    if (user.isPresent()) {
+      User u = user.get();
+      u.setPassword(encoder.encode(request.getNewPassword()));
+      userRepository.save(u);
+      return ResponseEntity.ok(new MessageResponse("Password changed successfully"));
+    } else {
+      return ResponseEntity.notFound().build();
+    }
   }
 
   @PostMapping("/signup")
