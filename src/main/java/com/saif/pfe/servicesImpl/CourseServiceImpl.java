@@ -1,27 +1,29 @@
 package com.saif.pfe.servicesImpl;
 
-import com.saif.pfe.models.Course;
-import com.saif.pfe.models.Role;
-import com.saif.pfe.models.TeacherCourse;
-import com.saif.pfe.models.User;
+import com.saif.pfe.models.*;
+import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.CourseRepository;
 import com.saif.pfe.repository.TeacherCourseRepository;
+import com.saif.pfe.repository.TeacherRepository;
 import com.saif.pfe.services.CourseService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
     private final TeacherCourseRepository teacherCourseRepository;
+    private final TeacherRepository teacherRepository;
 
-    public CourseServiceImpl(CourseRepository courseRepository, TeacherCourseRepository teacherCourseRepository) {
+    public CourseServiceImpl(CourseRepository courseRepository, TeacherCourseRepository teacherCourseRepository, TeacherRepository teacherRepository) {
         this.courseRepository = courseRepository;
         this.teacherCourseRepository = teacherCourseRepository;
+        this.teacherRepository = teacherRepository;
     }
 
     @Override
@@ -37,11 +39,18 @@ public class CourseServiceImpl implements CourseService {
 
     @Override
     public List<Course> getAllCourses(SearchCriteria searchCriteria, User user) {
+        List<ERole> roles= user.getRoles().stream().map(Role::getName).toList();
 
-        if (user.getRoles().contains(Role.ADMIN)){
+
+
+        if (roles.contains(ERole.ROLE_ADMIN)){
             return courseRepository.findAll(searchCriteria.getPageable()).toList();
-        }else if (user.getRoles().contains(Role.MODERATOR)){
-           List<TeacherCourse> teacherCourses=teacherCourseRepository.findAllByTeacherId(user.getId());
+        }else if (roles.contains(ERole.ROLE_MODERATOR)){
+            Optional<Teacher> teacher=teacherRepository.findByUserId(user.getId());
+            if (teacher.isEmpty()){
+                return new ArrayList<>();
+            }
+           List<TeacherCourse> teacherCourses=teacherCourseRepository.findAllByTeacherId(teacher.get().getId());
            List<Course> courses=new ArrayList<>();
            for (TeacherCourse teacherCourse:teacherCourses){
               courses.add(teacherCourse.getCourse());

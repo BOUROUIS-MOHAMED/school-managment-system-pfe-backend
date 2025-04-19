@@ -89,8 +89,8 @@ public class NoteController {
     }
 
     @GetMapping("/student/pdf")
-    public ResponseEntity<byte[]> generatePdf(@RequestParam("studentUuid") String studentUuid) {
-        Student student = studentService.getStudentByUuid(studentUuid);
+    public ResponseEntity<byte[]> generatePdf(@RequestParam("id") String id) {
+        Student student = studentService.getStudentById(Long.valueOf(id));
         if (student == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

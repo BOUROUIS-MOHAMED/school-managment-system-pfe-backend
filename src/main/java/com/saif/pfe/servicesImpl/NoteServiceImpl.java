@@ -4,9 +4,12 @@ import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.saif.pfe.models.*;
+import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.ennum.NoteType;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.NoteRepository;
+import com.saif.pfe.repository.StudentRepository;
+import com.saif.pfe.repository.TeacherRepository;
 import com.saif.pfe.services.NoteService;
 import com.saif.pfe.services.StudentService;
 import com.itextpdf.text.pdf.PdfWriter;
@@ -22,9 +25,13 @@ import java.util.stream.Stream;
 @Service
 public class NoteServiceImpl implements NoteService {
     private final NoteRepository noteRepository;
+    private final TeacherRepository teacherRepository;
+    private final StudentRepository studentRepository;
 
-    public NoteServiceImpl(NoteRepository noteRepository, StudentService studentService) {
+    public NoteServiceImpl(NoteRepository noteRepository, StudentService studentService, TeacherRepository teacherRepository, StudentRepository studentRepository) {
         this.noteRepository = noteRepository;
+        this.teacherRepository = teacherRepository;
+        this.studentRepository = studentRepository;
     }
 
 
@@ -46,12 +53,23 @@ public class NoteServiceImpl implements NoteService {
     @Override
     public List<Note> getAllNotes(SearchCriteria searchCriteria, User user) {
 
-        if (user.getRoles().contains(Role.ADMIN)){
+        List<ERole> roles= user.getRoles().stream().map(Role::getName).toList();
+
+
+        if (roles.contains(ERole.ROLE_ADMIN)) {
             return noteRepository.findAll(searchCriteria.getPageable()).toList();
-        }else if(user.getRoles().contains(Role.USER)){
-            return  noteRepository.findByStudentId(user.getId());
-        }else if (user.getRoles().contains(Role.MODERATOR)){
-            return  noteRepository.findByTeacherId(user.getId());
+        }else if(roles.contains(ERole.ROLE_USER)){
+            Optional<Student> student=studentRepository.findByUserId(user.getId());
+            if (student.isEmpty()){
+                return new ArrayList<>();
+            }
+            return  noteRepository.findByStudentId(student.get().getId());
+        }else if (roles.contains(ERole.ROLE_MODERATOR)){
+            Optional<Teacher> teacher=teacherRepository.findByUserId(user.getId());
+            if (teacher.isEmpty()){
+                return new ArrayList<>();
+            }
+            return  noteRepository.findByTeacherId(teacher.get().getId());
         }else return new ArrayList<>();
 
        }

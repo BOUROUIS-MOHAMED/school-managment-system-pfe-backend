@@ -1,11 +1,11 @@
 package com.saif.pfe.servicesImpl;
 
-import com.saif.pfe.models.Pfe;
-import com.saif.pfe.models.Role;
-import com.saif.pfe.models.User;
+import com.saif.pfe.models.*;
 import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.PfeRepository;
+import com.saif.pfe.repository.StudentRepository;
+import com.saif.pfe.repository.TeacherRepository;
 import com.saif.pfe.services.PfeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,10 @@ public class PfeServiceImpl implements PfeService {
 
     @Autowired
     private PfeRepository pfeRepository;
+    @Autowired
+    private StudentRepository studentRepository;
+    @Autowired
+    private TeacherRepository teacherRepository;
 
     // Create or Update
     public Pfe saveOrUpdatePfe(Pfe pfe) {
@@ -36,14 +40,25 @@ public class PfeServiceImpl implements PfeService {
 
 
 
+        List<ERole> roles= user.getRoles().stream().map(Role::getName).toList();
 
 
-        if (user.getRoles().contains(Role.ADMIN)){
+        if (roles.contains(ERole.ROLE_ADMIN)) {
             return pfeRepository.findAll(searchCriteria.getPageable()).toList();
-        }else if(user.getRoles().contains(Role.USER)){
-            return  pfeRepository.findAllByStudentOneIdOrStudentTwoId(user.getId(), user.getId());
-        }else if (user.getRoles().contains(Role.MODERATOR)){
-            return pfeRepository.findAllBySupervisorIdOrPresidentIdOrRapporteurId(user.getId(), user.getId(), user.getId());
+        }else if(roles.contains(ERole.ROLE_USER)){
+            Optional<Student> student=studentRepository.findByUserId(user.getId());
+            if (student.isEmpty()){
+                return new ArrayList<>();
+            }
+            Long id=student.get().getId();
+            return  pfeRepository.findAllByStudentOneIdOrStudentTwoId(id,id);
+        }else if (roles.contains(ERole.ROLE_MODERATOR)){
+            Optional<Teacher> teacher=teacherRepository.findByUserId(user.getId());
+            if (teacher.isEmpty()){
+                return new ArrayList<>();
+            }
+            Long id=teacher.get().getId();
+            return pfeRepository.findAllBySupervisorIdOrPresidentIdOrRapporteurId(id,id,id);
         }else return new ArrayList<>();
     }
 

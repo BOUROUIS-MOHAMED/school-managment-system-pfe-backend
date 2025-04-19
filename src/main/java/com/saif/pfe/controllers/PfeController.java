@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +54,11 @@ public class PfeController {
 
         Optional<User> user=userRepository.findByUsername(accountUsernameId);
         if(user.isPresent()) {
+            System.out.println("the account founded and its role is " + user.get().getRoles().toString() );
+            System.out.println(Arrays.toString(user.get().getRoles().toArray()));
+            System.out.println( user.get().getRoles().stream().toList() );
+            System.out.println(user.get().getRoles().stream().map(role -> role.getName()).toList() );
+
             return ResponseEntity.ok(pfeService.getAllPfes(searchCriteria,user.get()));
         }else{
             return ResponseEntity.notFound().build();

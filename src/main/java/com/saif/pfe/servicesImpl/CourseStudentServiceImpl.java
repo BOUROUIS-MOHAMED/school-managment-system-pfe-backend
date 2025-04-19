@@ -4,6 +4,7 @@ import com.saif.pfe.models.CourseStudent;
 import com.saif.pfe.models.Role;
 import com.saif.pfe.models.User;
 import com.saif.pfe.models.embeddedId.CourseStudentId;
+import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.CourseStudentRepository;
 import com.saif.pfe.services.CourseStudentService;
@@ -23,10 +24,12 @@ public class CourseStudentServiceImpl implements CourseStudentService {
     @Override
     public List<CourseStudent> findAll(SearchCriteria searchCriteria, User user) {
 
+        List<ERole> roles= user.getRoles().stream().map(Role::getName).toList();
 
-        if (user.getRoles().contains(Role.ADMIN)){
+
+        if (roles.contains(ERole.ROLE_ADMIN)) {
             return repository.findAll(searchCriteria.getPageable()).toList();
-        }else if(user.getRoles().contains(Role.USER)){
+        }else if(roles.contains(ERole.ROLE_USER)){
             return  repository.findAllByStudentId(user.getId());
 
         }else return new ArrayList<>();

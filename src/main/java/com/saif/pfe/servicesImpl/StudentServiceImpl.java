@@ -1,27 +1,31 @@
 package com.saif.pfe.servicesImpl;
 
-import com.saif.pfe.models.Role;
-import com.saif.pfe.models.Student;
-import com.saif.pfe.models.TeacherClassroom;
-import com.saif.pfe.models.User;
+import com.saif.pfe.models.*;
+import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
-import com.saif.pfe.repository.StudentRepository;
-import com.saif.pfe.repository.TeacherClassroomRepository;
+import com.saif.pfe.repository.*;
 import com.saif.pfe.services.StudentService;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
     private final TeacherClassroomRepository teacherClassroomRepository;
+    private final TeacherCourseRepository teacherCourseRepository;
+    private final TeacherRepository teacherRepository;
+    private final CourseStudentRepository courseStudentRepository;
 
-    public StudentServiceImpl(StudentRepository studentRepository, TeacherClassroomRepository teacherClassroomRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository, TeacherClassroomRepository teacherClassroomRepository, TeacherCourseRepository teacherCourseRepository, TeacherRepository teacherRepository, CourseStudentRepository courseStudentRepository) {
         this.studentRepository = studentRepository;
         this.teacherClassroomRepository = teacherClassroomRepository;
+        this.teacherCourseRepository = teacherCourseRepository;
+        this.teacherRepository = teacherRepository;
+        this.courseStudentRepository = courseStudentRepository;
     }
 
     public Student createStudent(Student student) {
@@ -30,20 +34,40 @@ public class StudentServiceImpl implements StudentService {
 
     public List<Student> getAllStudents(SearchCriteria searchCriteria, User user) {
 
-        if (user.getRoles().contains(Role.ADMIN)){
+        List<ERole> roles= user.getRoles().stream().map(Role::getName).toList();
+
+
+        if (roles.contains(ERole.ROLE_ADMIN)) {
             return studentRepository.findAll(searchCriteria.getPageable()).toList();
-        }if (user.getRoles().contains(Role.MODERATOR)){
-        List<Student> students = studentRepository.findAll();
-        List<TeacherClassroom> teacherClassrooms = teacherClassroomRepository.findAll();
-        List<Student> filteredStudents = new ArrayList<>();
-        for (Student student : students) {
-            for (TeacherClassroom teacherClassroom : teacherClassrooms) {
-                if (student.getClassroom().getId().equals(teacherClassroom.getClassroom().getId())) {
-                    filteredStudents.add(student);
-                }
+        }if (roles.contains(ERole.ROLE_MODERATOR)){
+
+            Optional<Teacher> teacher=teacherRepository.findByUserId(user.getId());
+            if (teacher.isEmpty()){
+                return new ArrayList<>();
             }
-        }
-        return filteredStudents;
+            Long id=teacher.get().getId();
+
+            // Fetch the courses taught by this teacher
+            List<TeacherCourse> teacherCourses = teacherCourseRepository.findAllByTeacherId(id);
+
+            if (teacherCourses.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            // Collect the course IDs
+            List<Long> courseIds = teacherCourses.stream()
+                    .map(tc -> tc.getCourse().getId())
+                    .toList();
+
+            // Fetch CourseStudent relations where courseId matches
+            List<CourseStudent> courseStudents = courseStudentRepository.findAllByCourseIdIn(courseIds);
+
+            // Collect distinct students
+            return courseStudents.stream()
+                    .map(CourseStudent::getStudent)
+                    .distinct()
+                    .toList();
+
         }else return new ArrayList<>();
 
     }
