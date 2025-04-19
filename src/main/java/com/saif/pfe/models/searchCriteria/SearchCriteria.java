@@ -11,7 +11,7 @@ public class SearchCriteria extends CommonBaseDTO {
     private String order;
 
     public SearchCriteria() {
-        this.size = 10;
+        this.size = 500;
         this.page = 0;
     }
 
