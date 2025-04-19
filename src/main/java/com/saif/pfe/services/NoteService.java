@@ -2,6 +2,7 @@ package com.saif.pfe.services;
 
 import com.saif.pfe.models.Note;
 import com.saif.pfe.models.Student;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 public interface NoteService {
 
     Note createNote(Note note);
-    List<Note> getAllNotes(SearchCriteria searchCriteria);
+    List<Note> getAllNotes(SearchCriteria searchCriteria, User user);
     Note getNoteById(Long id);
     Note updateNote(Long id, Note note);
     void deleteNote(Long id);

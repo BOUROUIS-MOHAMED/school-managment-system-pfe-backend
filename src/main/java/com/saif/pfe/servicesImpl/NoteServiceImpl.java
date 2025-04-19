@@ -3,9 +3,7 @@ package com.saif.pfe.servicesImpl;
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
-import com.saif.pfe.models.Course;
-import com.saif.pfe.models.Note;
-import com.saif.pfe.models.Student;
+import com.saif.pfe.models.*;
 import com.saif.pfe.models.ennum.NoteType;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.NoteRepository;
@@ -46,9 +44,17 @@ public class NoteServiceImpl implements NoteService {
     }
 
     @Override
-    public List<Note> getAllNotes(SearchCriteria searchCriteria) {
-        return noteRepository.findAll(searchCriteria.getPageable()).toList();
-    }
+    public List<Note> getAllNotes(SearchCriteria searchCriteria, User user) {
+
+        if (user.getRoles().contains(Role.ADMIN)){
+            return noteRepository.findAll(searchCriteria.getPageable()).toList();
+        }else if(user.getRoles().contains(Role.USER)){
+            return  noteRepository.findByStudentId(user.getId());
+        }else if (user.getRoles().contains(Role.MODERATOR)){
+            return  noteRepository.findByTeacherId(user.getId());
+        }else return new ArrayList<>();
+
+       }
 
     @Override
     public Note getNoteById(Long id) {

@@ -2,25 +2,35 @@ package com.saif.pfe.controllers;
 
 import com.saif.pfe.models.Note;
 import com.saif.pfe.models.Student;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
+import com.saif.pfe.repository.UserRepository;
+import com.saif.pfe.security.jwt.JwtUtils;
 import com.saif.pfe.services.NoteService;
 import com.saif.pfe.services.StudentService;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/notes")
 public class NoteController {
     private final NoteService noteService;
     private final StudentService studentService;
+    private final UserRepository userRepository;
+    private final JwtUtils jwtUtils;
 
-    public NoteController(NoteService noteService, StudentService studentService) {
+    public NoteController(NoteService noteService, StudentService studentService, UserRepository userRepository, JwtUtils jwtUtils) {
         this.noteService = noteService;
         this.studentService = studentService;
+        this.userRepository = userRepository;
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping
@@ -29,8 +39,25 @@ public class NoteController {
     }
 
     @GetMapping
-    public List<Note> getAllNotes(@ModelAttribute SearchCriteria searchCriteria) {
-        return noteService.getAllNotes(searchCriteria);
+    public List<Note> getAllNotes(@ModelAttribute SearchCriteria searchCriteria, HttpServletRequest httpRequest) {
+        String token = httpRequest.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // Remove the "Bearer " prefix
+        }
+
+        // Use JwtUtil to extract accountUsernameId from the token
+        String accountUsernameId = jwtUtils.getUserNameFromJwtToken(token);
+
+        System.out.println("the account username id extracted from token is " + accountUsernameId);
+
+        Optional<User> user=userRepository.findByUsername(accountUsernameId);
+        if(user.isPresent()) {
+            return noteService.getAllNotes(searchCriteria,user.get());
+        }else{
+            return new ArrayList<>();
+        }
+
+
     }
 
     @GetMapping("/{id}")

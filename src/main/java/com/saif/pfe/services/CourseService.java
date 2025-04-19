@@ -2,6 +2,7 @@ package com.saif.pfe.services;
 
 
 import com.saif.pfe.models.Course;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 
 import java.util.List;
@@ -11,7 +12,7 @@ public interface CourseService {
 
     Course getCourseById(Long id);
 
-    List<Course> getAllCourses(SearchCriteria searchCriteria);
+    List<Course> getAllCourses(SearchCriteria searchCriteria, User user);
 
     Course updateCourse(Long id, Course courseDetails);
 

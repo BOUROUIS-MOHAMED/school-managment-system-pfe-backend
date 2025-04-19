@@ -17,7 +17,7 @@ public class Note extends Base {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Float score;
+    private float score;
 
     @Enumerated(EnumType.STRING)
     private NoteType type;

@@ -1,19 +1,30 @@
 package com.saif.pfe.controllers;
 
 import com.saif.pfe.models.Student;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
+import com.saif.pfe.repository.UserRepository;
+import com.saif.pfe.security.jwt.JwtUtils;
 import com.saif.pfe.services.StudentService;
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/students")
 public class StudentController {
     private final StudentService studentService;
+    private final UserRepository userRepository;
+    private final JwtUtils jwtUtils;
 
-    public StudentController(StudentService studentService) {
+    public StudentController(StudentService studentService, UserRepository userRepository, JwtUtils jwtUtils) {
         this.studentService = studentService;
+        this.userRepository = userRepository;
+        this.jwtUtils = jwtUtils;
     }
 
     @PostMapping
@@ -22,8 +33,25 @@ public class StudentController {
     }
 
     @GetMapping
-    public List<Student> getAllStudents(@ModelAttribute SearchCriteria searchCriteria) {
-        return studentService.getAllStudents(searchCriteria);
+    public List<Student> getAllStudents(@ModelAttribute SearchCriteria searchCriteria, HttpServletRequest httpRequest) {
+        String token = httpRequest.getHeader("Authorization");
+        if (token != null && token.startsWith("Bearer ")) {
+            token = token.substring(7); // Remove the "Bearer " prefix
+        }
+
+        // Use JwtUtil to extract accountUsernameId from the token
+        String accountUsernameId = jwtUtils.getUserNameFromJwtToken(token);
+
+        System.out.println("the account username id extracted from token is " + accountUsernameId);
+
+        Optional<User> user=userRepository.findByUsername(accountUsernameId);
+        if(user.isPresent()) {
+            return (studentService.getAllStudents(searchCriteria,user.get()));
+        }else{
+            return new ArrayList<>();
+        }
+
+
     }
 
     @GetMapping("/{id}")

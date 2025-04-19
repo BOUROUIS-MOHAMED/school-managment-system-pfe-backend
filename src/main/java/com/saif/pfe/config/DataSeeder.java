@@ -301,18 +301,18 @@ public class DataSeeder implements CommandLineRunner {
             pfeList.add(
                     Pfe.builder()
                             .name("PFE Project " + (i + 1))
-                            .student_one(studentOne)
-                            .student_two(studentTwo)
+                            .studentOne(studentOne)
+                            .studentTwo(studentTwo)
                             .supervisor(supervisor)
                             .president(president)
                             .rapporteur(rapporteur)
                             .guest(random.nextBoolean() ? "Guest " + faker.name().fullName() : null)
                             .date(LocalDate.now().plusDays(random.nextInt(90))) // random date in next 3 months
-                            .note_student_one(Math.round(random.nextDouble() * 20 * 100.0) / 100.0)
-                            .note_student_two(Math.round(random.nextDouble() * 20 * 100.0) / 100.0)
-                            .link_report(faker.internet().url())
-                            .link_presentation(faker.internet().url())
-                            .link_certificate(faker.internet().url())
+                            .noteStudentOne(Math.round(random.nextDouble() * 20 * 100.0) / 100.0)
+                            .noteStudentTwo(Math.round(random.nextDouble() * 20 * 100.0) / 100.0)
+                            .linkReport(faker.internet().url())
+                            .linkPresentation(faker.internet().url())
+                            .linkCertificate(faker.internet().url())
                             .information(faker.lorem().sentence())
                             .status(Status.values()[random.nextInt(Status.values().length)])
                             .build()
@@ -337,18 +337,18 @@ public class DataSeeder implements CommandLineRunner {
             pfeList.add(
                     Pfe.builder()
                             .name("PFE Project " + (i + 1))
-                            .student_one(studentOne)
-                            .student_two(null) // No second student
+                            .studentOne(studentOne)
+                            .studentTwo(null) // No second student
                             .supervisor(supervisor)
                             .president(president)
                             .rapporteur(rapporteur)
                             .guest(random.nextBoolean() ? "Guest " + faker.name().fullName() : null)
                             .date(LocalDate.now().plusDays(random.nextInt(90))) // random date in next 3 months
-                            .note_student_one(Math.round(random.nextDouble() * 20 * 100.0) / 100.0)
-                            .note_student_two(0)  // student_two is null so note is 0
-                            .link_report(faker.internet().url())
-                            .link_presentation(faker.internet().url())
-                            .link_certificate(faker.internet().url())
+                            .noteStudentOne(Math.round(random.nextDouble() * 20 * 100.0) / 100.0)
+                            .noteStudentTwo(0)  // student_two is null so note is 0
+                            .linkReport(faker.internet().url())
+                            .linkPresentation(faker.internet().url())
+                            .linkCertificate(faker.internet().url())
                             .information(faker.lorem().sentence())
                             .status(Status.values()[random.nextInt(Status.values().length)])
                             .build()
@@ -397,7 +397,7 @@ public class DataSeeder implements CommandLineRunner {
                             .id(id)
                             .teacher(teacher)
                             .classroom(classroom)
-                            .disabled(random.nextBoolean())  // Randomly enable/disable relation
+                            .disabled(Boolean.valueOf(random.nextBoolean()))  // Randomly enable/disable relation
                             .build();
 
                     teacherClassroomList.add(relation);

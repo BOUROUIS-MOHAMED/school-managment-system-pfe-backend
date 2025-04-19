@@ -1,6 +1,7 @@
 package com.saif.pfe.services;
 
 import com.saif.pfe.models.Pfe;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 
 import java.util.List;
@@ -10,6 +11,6 @@ public interface PfeService {
 
     Pfe saveOrUpdatePfe(Pfe pfe);
     Optional<Pfe> getPfeById(Long id);
-    List<Pfe> getAllPfes(SearchCriteria searchCriteria);
+    List<Pfe> getAllPfes(SearchCriteria searchCriteria, User user);
     void deletePfe(Long id);
 }

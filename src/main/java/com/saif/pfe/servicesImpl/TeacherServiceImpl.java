@@ -1,12 +1,16 @@
 package com.saif.pfe.servicesImpl;
 
+import com.saif.pfe.models.Role;
 import com.saif.pfe.models.Teacher;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.TeacherRepository;
 import com.saif.pfe.services.TeacherService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class TeacherServiceImpl implements TeacherService {
@@ -22,8 +26,13 @@ public class TeacherServiceImpl implements TeacherService {
         return teacherRepository.save(teacher);
     }
 
-    public List<Teacher> getAllTeachers(SearchCriteria searchCriteria) {
-        return teacherRepository.findAll(searchCriteria.getPageable()).toList();
+    public List<Teacher> getAllTeachers(SearchCriteria searchCriteria, User user) {
+
+        if ((user.getRoles().contains(Role.ADMIN)) || (user.getRoles().contains(Role.USER))) {
+            return teacherRepository.findAll(searchCriteria.getPageable()).toList();
+        }else if (user.getRoles().contains(Role.MODERATOR)){
+            return List.of(Objects.requireNonNull(teacherRepository.findById(user.getId()).orElse(null)));
+        }else return new ArrayList<>();
     }
 
     public Teacher getTeacherById(Long id) {

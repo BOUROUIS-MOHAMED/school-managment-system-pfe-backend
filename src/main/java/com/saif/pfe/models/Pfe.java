@@ -22,9 +22,9 @@ public class Pfe extends Base {
     private String name;
 
     @OneToOne
-    private Student student_one;
+    private Student studentOne;
     @OneToOne
-    private Student student_two;
+    private Student studentTwo;
     @ManyToOne
     private Teacher supervisor;
     @ManyToOne
@@ -36,12 +36,12 @@ public class Pfe extends Base {
 
     LocalDate date;
 
-    private double note_student_one;
-    private double note_student_two;
+    private double noteStudentOne;
+    private double noteStudentTwo;
 
-    private String link_report;
-    private String link_presentation;
-    private String link_certificate;
+    private String linkReport;
+    private String linkPresentation;
+    private String linkCertificate;
     String information;
     @Enumerated(EnumType.STRING)
     private Status status;

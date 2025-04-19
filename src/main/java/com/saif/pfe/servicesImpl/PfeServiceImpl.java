@@ -1,14 +1,19 @@
 package com.saif.pfe.servicesImpl;
 
 import com.saif.pfe.models.Pfe;
+import com.saif.pfe.models.Role;
+import com.saif.pfe.models.User;
+import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.PfeRepository;
 import com.saif.pfe.services.PfeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class PfeServiceImpl implements PfeService {
@@ -27,8 +32,19 @@ public class PfeServiceImpl implements PfeService {
     }
 
     // Find all
-    public List<Pfe> getAllPfes(SearchCriteria searchCriteria) {
-        return pfeRepository.findAll(searchCriteria.getPageable()).toList();
+    public List<Pfe> getAllPfes(SearchCriteria searchCriteria, User user) {
+
+
+
+
+
+        if (user.getRoles().contains(Role.ADMIN)){
+            return pfeRepository.findAll(searchCriteria.getPageable()).toList();
+        }else if(user.getRoles().contains(Role.USER)){
+            return  pfeRepository.findAllByStudentOneIdOrStudentTwoId(user.getId(), user.getId());
+        }else if (user.getRoles().contains(Role.MODERATOR)){
+            return pfeRepository.findAllBySupervisorIdOrPresidentIdOrRapporteurId(user.getId(), user.getId(), user.getId());
+        }else return new ArrayList<>();
     }
 
     // Delete

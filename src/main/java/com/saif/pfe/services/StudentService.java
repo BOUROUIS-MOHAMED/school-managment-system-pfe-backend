@@ -1,13 +1,14 @@
 package com.saif.pfe.services;
 
 import com.saif.pfe.models.Student;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 
 import java.util.List;
 
 public interface StudentService {
     Student createStudent(Student student);
-    List<Student> getAllStudents(SearchCriteria searchCriteria);
+    List<Student> getAllStudents(SearchCriteria searchCriteria, User user);
     Student getStudentById(Long id);
     Student getStudentByUuid(String uuid);
     Student updateStudent(Long id, Student student);

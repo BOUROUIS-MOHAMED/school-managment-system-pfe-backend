@@ -1,28 +1,51 @@
 package com.saif.pfe.servicesImpl;
 
+import com.saif.pfe.models.Role;
 import com.saif.pfe.models.Student;
+import com.saif.pfe.models.TeacherClassroom;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.StudentRepository;
+import com.saif.pfe.repository.TeacherClassroomRepository;
 import com.saif.pfe.services.StudentService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class StudentServiceImpl implements StudentService {
 
     private final StudentRepository studentRepository;
+    private final TeacherClassroomRepository teacherClassroomRepository;
 
-    public StudentServiceImpl(StudentRepository studentRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository, TeacherClassroomRepository teacherClassroomRepository) {
         this.studentRepository = studentRepository;
+        this.teacherClassroomRepository = teacherClassroomRepository;
     }
 
     public Student createStudent(Student student) {
         return studentRepository.save(student);
     }
 
-    public List<Student> getAllStudents(SearchCriteria searchCriteria) {
-        return studentRepository.findAll(searchCriteria.getPageable()).toList();
+    public List<Student> getAllStudents(SearchCriteria searchCriteria, User user) {
+
+        if (user.getRoles().contains(Role.ADMIN)){
+            return studentRepository.findAll(searchCriteria.getPageable()).toList();
+        }if (user.getRoles().contains(Role.MODERATOR)){
+        List<Student> students = studentRepository.findAll();
+        List<TeacherClassroom> teacherClassrooms = teacherClassroomRepository.findAll();
+        List<Student> filteredStudents = new ArrayList<>();
+        for (Student student : students) {
+            for (TeacherClassroom teacherClassroom : teacherClassrooms) {
+                if (student.getClassroom().getId().equals(teacherClassroom.getClassroom().getId())) {
+                    filteredStudents.add(student);
+                }
+            }
+        }
+        return filteredStudents;
+        }else return new ArrayList<>();
+
     }
 
     public Student getStudentById(Long id) {

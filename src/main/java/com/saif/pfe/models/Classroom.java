@@ -26,5 +26,5 @@ public class Classroom extends Base implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
-    private Integer capacity;
+    private int capacity;
 }

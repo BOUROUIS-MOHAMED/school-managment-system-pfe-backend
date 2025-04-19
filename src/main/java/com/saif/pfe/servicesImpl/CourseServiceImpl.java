@@ -1,20 +1,27 @@
 package com.saif.pfe.servicesImpl;
 
 import com.saif.pfe.models.Course;
+import com.saif.pfe.models.Role;
+import com.saif.pfe.models.TeacherCourse;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.CourseRepository;
+import com.saif.pfe.repository.TeacherCourseRepository;
 import com.saif.pfe.services.CourseService;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class CourseServiceImpl implements CourseService {
 
     private final CourseRepository courseRepository;
+    private final TeacherCourseRepository teacherCourseRepository;
 
-    public CourseServiceImpl(CourseRepository courseRepository) {
+    public CourseServiceImpl(CourseRepository courseRepository, TeacherCourseRepository teacherCourseRepository) {
         this.courseRepository = courseRepository;
+        this.teacherCourseRepository = teacherCourseRepository;
     }
 
     @Override
@@ -29,8 +36,18 @@ public class CourseServiceImpl implements CourseService {
     }
 
     @Override
-    public List<Course> getAllCourses(SearchCriteria searchCriteria) {
-        return courseRepository.findAll(searchCriteria.getPageable()).toList();
+    public List<Course> getAllCourses(SearchCriteria searchCriteria, User user) {
+
+        if (user.getRoles().contains(Role.ADMIN)){
+            return courseRepository.findAll(searchCriteria.getPageable()).toList();
+        }else if (user.getRoles().contains(Role.MODERATOR)){
+           List<TeacherCourse> teacherCourses=teacherCourseRepository.findAllByTeacherId(user.getId());
+           List<Course> courses=new ArrayList<>();
+           for (TeacherCourse teacherCourse:teacherCourses){
+              courses.add(teacherCourse.getCourse());
+           }
+           return courses;
+        }else return new ArrayList<>();
     }
 
     @Override

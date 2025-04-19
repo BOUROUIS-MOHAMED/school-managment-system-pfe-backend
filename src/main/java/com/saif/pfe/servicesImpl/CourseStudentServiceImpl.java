@@ -1,6 +1,8 @@
 package com.saif.pfe.servicesImpl;
 
 import com.saif.pfe.models.CourseStudent;
+import com.saif.pfe.models.Role;
+import com.saif.pfe.models.User;
 import com.saif.pfe.models.embeddedId.CourseStudentId;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.CourseStudentRepository;
@@ -8,6 +10,7 @@ import com.saif.pfe.services.CourseStudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,8 +21,17 @@ public class CourseStudentServiceImpl implements CourseStudentService {
     private CourseStudentRepository repository;
 
     @Override
-    public List<CourseStudent> findAll(SearchCriteria searchCriteria) {
-        return repository.findAll(searchCriteria.getPageable()).toList();
+    public List<CourseStudent> findAll(SearchCriteria searchCriteria, User user) {
+
+
+        if (user.getRoles().contains(Role.ADMIN)){
+            return repository.findAll(searchCriteria.getPageable()).toList();
+        }else if(user.getRoles().contains(Role.USER)){
+            return  repository.findAllByStudentId(user.getId());
+
+        }else return new ArrayList<>();
+
+
     }
 
     @Override

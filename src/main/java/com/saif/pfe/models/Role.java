@@ -42,4 +42,11 @@ public class Role extends Base{
   public void setName(ERole name) {
     this.name = name;
   }
+
+  // In Role.java
+  public static final Role ADMIN = new Role(ERole.ROLE_ADMIN);
+  public static final Role USER = new Role(ERole.ROLE_USER);
+  public static final Role MODERATOR = new Role(ERole.ROLE_MODERATOR);
+
 }
+
