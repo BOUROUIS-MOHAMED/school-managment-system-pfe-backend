@@ -1,10 +1,12 @@
 package com.saif.pfe.servicesImpl;
 
 import com.saif.pfe.models.Role;
+import com.saif.pfe.models.Student;
 import com.saif.pfe.models.Teacher;
 import com.saif.pfe.models.User;
 import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
+import com.saif.pfe.repository.RoleRepository;
 import com.saif.pfe.repository.TeacherRepository;
 import com.saif.pfe.repository.UserRepository;
 import com.saif.pfe.services.TeacherService;
@@ -18,24 +20,28 @@ public class TeacherServiceImpl implements TeacherService {
 
     private final TeacherRepository teacherRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
-    public TeacherServiceImpl(TeacherRepository teacherRepository, UserRepository userRepository) {
+    public TeacherServiceImpl(TeacherRepository teacherRepository, UserRepository userRepository, RoleRepository roleRepository) {
         this.teacherRepository = teacherRepository;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
 
 
     @Transactional
     public Teacher createTeacher(Teacher teacher) {
-        teacher.getUser().setEmail(teacher.getEmail());
-        teacher.getUser().setPassword(teacher.getUser().getPassword());
-        teacher.getUser().setRoles(Set.of(Role.builder()
-                .name(ERole.ROLE_MODERATOR)
-                .build()));
-        teacher.setUuid(teacher.getUser().getUuid());
-        // cascade will save the user first, then the student with the same ID
+        // Fetch managed ROLE_MODERATOR
+        Role userRole = roleRepository.findByName(ERole.ROLE_MODERATOR)
+                .orElseThrow(() -> new IllegalStateException("ROLE_MOD not found"));
+
+        User user = teacher.getUser();
+        user.setEmail(teacher.getEmail());
+        user.setRoles(Set.of(userRole));
+        // CascadeType.ALL on Student.user ensures saving both
         return teacherRepository.save(teacher);
     }
+
 
     public List<Teacher> getAllTeachers(SearchCriteria searchCriteria, User user) {
 

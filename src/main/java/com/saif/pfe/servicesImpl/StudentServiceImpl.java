@@ -22,25 +22,29 @@ public class StudentServiceImpl implements StudentService {
     private final TeacherRepository teacherRepository;
     private final CourseStudentRepository courseStudentRepository;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
 
 
-    public StudentServiceImpl(StudentRepository studentRepository, TeacherClassroomRepository teacherClassroomRepository, TeacherCourseRepository teacherCourseRepository, TeacherRepository teacherRepository, CourseStudentRepository courseStudentRepository, UserRepository userRepository) {
+    public StudentServiceImpl(StudentRepository studentRepository, TeacherClassroomRepository teacherClassroomRepository, TeacherCourseRepository teacherCourseRepository, TeacherRepository teacherRepository, CourseStudentRepository courseStudentRepository, UserRepository userRepository, RoleRepository roleRepository) {
         this.studentRepository = studentRepository;
         this.teacherClassroomRepository = teacherClassroomRepository;
         this.teacherCourseRepository = teacherCourseRepository;
         this.teacherRepository = teacherRepository;
         this.courseStudentRepository = courseStudentRepository;
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
     }
+
     @Transactional
     public Student createStudent(Student student) {
-        student.getUser().setEmail(student.getEmail());
-        student.getUser().setPassword(student.getUser().getPassword());
-        student.getUser().setRoles(Set.of(Role.builder()
-                .name(ERole.ROLE_USER)
-                .build()));
-        student.setUuid(student.getUser().getUuid());
-        // cascade will save the user first, then the student with the same ID
+        // Fetch managed ROLE_USER
+        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                .orElseThrow(() -> new IllegalStateException("ROLE_USER not found"));
+
+        User user = student.getUser();
+        user.setEmail(student.getEmail());
+        user.setRoles(Set.of(userRole));
+        // CascadeType.ALL on Student.user ensures saving both
         return studentRepository.save(student);
     }
 
