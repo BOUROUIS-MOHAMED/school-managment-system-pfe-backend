@@ -3,6 +3,7 @@ package com.saif.pfe.models;
 import com.saif.pfe.models.embeddedId.CourseStudentId;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Immutable;
 
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
@@ -11,6 +12,7 @@ import lombok.*;
 @Setter
 @Builder
 @Entity
+
 public class CourseStudent extends Base {
 
     @EmbeddedId

@@ -51,7 +51,8 @@ public class CourseStudentServiceImpl implements CourseStudentService {
     public CourseStudent update(CourseStudentId id, CourseStudent courseStudent) {
         Optional<CourseStudent> existing = repository.findById(id);
         if (existing.isPresent()) {
-            courseStudent.setId(id); // Ensure the composite key is preserved
+            repository.deleteById(id);
+            courseStudent.setId(id);
             return repository.save(courseStudent);
         }
         throw new RuntimeException("CourseStudent with ID " + id + " not found.");
