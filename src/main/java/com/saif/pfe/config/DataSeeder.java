@@ -295,5 +295,9 @@ public class DataSeeder implements CommandLineRunner {
                 System.out.println("Fake data inserted successfully!");
 
         }
+        else {
+            System.out.println("Fake data already inserted!");
+        }
     }
+
 }
