@@ -8,6 +8,7 @@ import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.TeacherRepository;
 import com.saif.pfe.repository.UserRepository;
 import com.saif.pfe.services.TeacherService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -24,15 +25,15 @@ public class TeacherServiceImpl implements TeacherService {
     }
 
 
+    @Transactional
     public Teacher createTeacher(Teacher teacher) {
-        User user = teacher.getUser() ;
-        user.setEmail(teacher.getEmail());
-        user.setPassword(teacher.getUser().getPassword());
-        user.setRoles(Set.of(Role.builder().name(ERole.ROLE_MODERATOR).build()));
-        user=userRepository.save(user);
-        teacher.setUser(user);
-        teacher.setUuid(user.getUuid());
-        teacher.setId(user.getId());
+        teacher.getUser().setEmail(teacher.getEmail());
+        teacher.getUser().setPassword(teacher.getUser().getPassword());
+        teacher.getUser().setRoles(Set.of(Role.builder()
+                .name(ERole.ROLE_MODERATOR)
+                .build()));
+        teacher.setUuid(teacher.getUser().getUuid());
+        // cascade will save the user first, then the student with the same ID
         return teacherRepository.save(teacher);
     }
 

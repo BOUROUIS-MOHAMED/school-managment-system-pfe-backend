@@ -5,6 +5,7 @@ import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.*;
 import com.saif.pfe.services.StudentService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -31,16 +32,15 @@ public class StudentServiceImpl implements StudentService {
         this.courseStudentRepository = courseStudentRepository;
         this.userRepository = userRepository;
     }
-
+    @Transactional
     public Student createStudent(Student student) {
-        User user = student.getUser() ;
-        user.setEmail(student.getEmail());
-        user.setPassword(student.getUser().getPassword());
-        user.setRoles(Set.of(Role.builder().name(ERole.ROLE_USER).build()));
-        user=userRepository.save(user);
-        student.setUser(user);
-        student.setUuid(user.getUuid());
-        student.setId(user.getId());
+        student.getUser().setEmail(student.getEmail());
+        student.getUser().setPassword(student.getUser().getPassword());
+        student.getUser().setRoles(Set.of(Role.builder()
+                .name(ERole.ROLE_USER)
+                .build()));
+        student.setUuid(student.getUser().getUuid());
+        // cascade will save the user first, then the student with the same ID
         return studentRepository.save(student);
     }
 

@@ -13,7 +13,7 @@ import lombok.*;
 public class Student extends Base {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+
     private Long id;
     private String name;
     private String email;
