@@ -120,7 +120,7 @@ public class DataSeeder implements CommandLineRunner {
                 userStudent.setUuid(UUID.randomUUID().toString());
 
                 Student student = new Student();
-                student.setName(faker.name().fullName());
+                student.setName(username);
                 student.setEmail(userStudent.getEmail());
                 student.setPhone(faker.phoneNumber().cellPhone());
                 student.setUser(userStudent);
@@ -145,7 +145,7 @@ public class DataSeeder implements CommandLineRunner {
                 teacherUser.setUuid(UUID.randomUUID().toString());
 
                 Teacher teacher = new Teacher();
-                teacher.setName(faker.name().fullName());
+                teacher.setName(username);
                 teacher.setEmail(teacherUser.getEmail());
                 teacher.setPhone(faker.phoneNumber().cellPhone());
                 teacher.setUser(teacherUser);
