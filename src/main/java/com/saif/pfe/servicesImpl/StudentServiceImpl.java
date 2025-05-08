@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Service
 public class StudentServiceImpl implements StudentService {
@@ -19,16 +20,27 @@ public class StudentServiceImpl implements StudentService {
     private final TeacherCourseRepository teacherCourseRepository;
     private final TeacherRepository teacherRepository;
     private final CourseStudentRepository courseStudentRepository;
+    private final UserRepository userRepository;
 
-    public StudentServiceImpl(StudentRepository studentRepository, TeacherClassroomRepository teacherClassroomRepository, TeacherCourseRepository teacherCourseRepository, TeacherRepository teacherRepository, CourseStudentRepository courseStudentRepository) {
+
+    public StudentServiceImpl(StudentRepository studentRepository, TeacherClassroomRepository teacherClassroomRepository, TeacherCourseRepository teacherCourseRepository, TeacherRepository teacherRepository, CourseStudentRepository courseStudentRepository, UserRepository userRepository) {
         this.studentRepository = studentRepository;
         this.teacherClassroomRepository = teacherClassroomRepository;
         this.teacherCourseRepository = teacherCourseRepository;
         this.teacherRepository = teacherRepository;
         this.courseStudentRepository = courseStudentRepository;
+        this.userRepository = userRepository;
     }
 
     public Student createStudent(Student student) {
+        User user = student.getUser() ;
+        user.setEmail(student.getEmail());
+        user.setPassword(student.getUser().getPassword());
+        user.setRoles(Set.of(Role.builder().name(ERole.ROLE_USER).build()));
+        user=userRepository.save(user);
+        student.setUser(user);
+        student.setUuid(user.getUuid());
+        student.setId(user.getId());
         return studentRepository.save(student);
     }
 

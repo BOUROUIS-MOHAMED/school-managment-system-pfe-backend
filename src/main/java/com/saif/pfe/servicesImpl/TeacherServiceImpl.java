@@ -6,25 +6,33 @@ import com.saif.pfe.models.User;
 import com.saif.pfe.models.ennum.ERole;
 import com.saif.pfe.models.searchCriteria.SearchCriteria;
 import com.saif.pfe.repository.TeacherRepository;
+import com.saif.pfe.repository.UserRepository;
 import com.saif.pfe.services.TeacherService;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class TeacherServiceImpl implements TeacherService {
 
     private final TeacherRepository teacherRepository;
+    private final UserRepository userRepository;
 
-    public TeacherServiceImpl(TeacherRepository teacherRepository) {
+    public TeacherServiceImpl(TeacherRepository teacherRepository, UserRepository userRepository) {
         this.teacherRepository = teacherRepository;
+        this.userRepository = userRepository;
     }
 
 
     public Teacher createTeacher(Teacher teacher) {
+        User user = teacher.getUser() ;
+        user.setEmail(teacher.getEmail());
+        user.setPassword(teacher.getUser().getPassword());
+        user.setRoles(Set.of(Role.builder().name(ERole.ROLE_MODERATOR).build()));
+        user=userRepository.save(user);
+        teacher.setUser(user);
+        teacher.setUuid(user.getUuid());
+        teacher.setId(user.getId());
         return teacherRepository.save(teacher);
     }
 
